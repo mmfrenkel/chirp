@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"/>
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/styles.css') }}" />
+        <script src="{{ url_for('static', filename='index.js') }}"></script>
+        <title>ChatBot</title>
+    </head>
+
+    <body>
+        <div class="container" id="appContainer">
+
+            <div class="container" id="tabContainer">
+                <div class="tab">
+                    <button class="channelTab" id="defaultOpen" data-channelname="welcome">Welcome!</button>
+                    <button class="channelTab" data-channelname="another1">Another Channel 1</button>
+                    <button class="channelTab" data-channelname="another2">Another Channel 2</button>
+                </div>
+            </div>
+
+            <div class="container" id="channelContainer">
+                <div id="welcome" class="channel">
+                  <h3>Welcome</h3>
+                  <p>This is the default channel for all users.</p>
+                </div>
+
+                <div id="another1" class="channel">
+                  <h3>Unnamed Channel</h3>
+                  <p>Unnamed Channel here...</p>
+                </div>
+
+                <div id="another2" class="channel">
+                  <h3>Another Unnamed Channel</h3>
+                  <p>Another Unnamed Channel here...</p>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
