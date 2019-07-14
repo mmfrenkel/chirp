@@ -9,32 +9,44 @@
     </head>
 
     <body>
+
+        <div id="header">
+            <h2>ChatBot</h2>
+        </div>
+
         <div class="container" id="appContainer">
 
             <div class="container" id="tabContainer">
-                <div class="tab">
+                <div class="tab" id="tabList">
                     <button class="channelTab" id="defaultOpen" data-channelname="welcome">Welcome!</button>
-                    <button class="channelTab" data-channelname="another1">Another Channel 1</button>
-                    <button class="channelTab" data-channelname="another2">Another Channel 2</button>
                 </div>
             </div>
-
             <div class="container" id="channelContainer">
                 <div id="welcome" class="channel">
-                  <h3>Welcome</h3>
-                  <p>This is the default channel for all users.</p>
-                </div>
-
-                <div id="another1" class="channel">
-                  <h3>Unnamed Channel</h3>
-                  <p>Unnamed Channel here...</p>
-                </div>
-
-                <div id="another2" class="channel">
-                  <h3>Another Unnamed Channel</h3>
-                  <p>Another Unnamed Channel here...</p>
+                    <h3>Welcome</h3>
+                    <div class="container chat">
+                        <p>This is the default channel for all users.</p>
+                    </div>
+                    <div class="channelFooter">
+                        <form class="submitNewMessage">
+                            <input class="form-control newMessage" type="text" placeholder="Write a message" name="message">
+                            <input class="btn" type="submit" value="Enter">
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="centerBox">
+            <h5> Create new channel </h5>
+            <hr>
+            <form id="newChannelForm">
+                <div class="form-group">
+                    <input class="form-control" placeholder="Give me a name!" name="newChannel" id="newChannelName">
+                    <input class="btn" type="submit" value="Create">
+                </div> <!-- form-group// -->
+            </form>
+        </div>
+
     </body>
 </html>
