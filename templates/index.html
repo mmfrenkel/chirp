@@ -2,17 +2,70 @@
 <html>
     <head>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"/>
-        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/styles.css') }}" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/styles.css') }}">
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
         <script src="{{ url_for('static', filename='index.js') }}"></script>
-        <title>ChatBot</title>
+        <title>Bark!</title>
     </head>
 
     <body>
-
         <div id="header">
-            <h2>ChatBot</h2>
+            <h2> ChatBot </h2>
         </div>
+
+        <div id="popup">
+            <div class="container popup-content">
+                <h2>Welcome to Chirp!</h2>
+                <h2>
+                    <span class="fa fa-comments"></span>
+                </h2>
+                <h5 id="status" >Let's start off by setting a username for you.</h5>
+              	<hr>
+          		<form class="popup-form" id="newUserForm">
+                  	<input type="text" placeholder="Enter a Username" name="username" id="usernameField" required>
+                  	<div class="clearfix">
+                   		<button type="submit" class="signupbtn btn">Sign Up</button>
+                  	</div>
+                </form>
+            </div>
+        </div>
+
+        <div class="container" id="userOptions">
+
+            <div class="centerBox" id="newChannelAdd">
+                <h5> Create new channel
+                     <span class="fa fa-comments"></span>
+                </h5>
+                <hr>
+                <form class="channelForm" id="newChannelForm">
+                    <div class="form-group">
+                        <input class="form-control" placeholder="Give me a name!" name="newChannel" id="newChannelName">
+                        <input class="btn" type="submit" value="Create">
+                    </div>
+                </form>
+            </div>
+
+            <div class="centerBox" id="existingChannelSearch">
+                <h5> Add an existing channel
+                    <span class="fa fa-comments"></span>
+                </h5>
+                <hr>
+                <form class="channelForm" id="existingChannelForm">
+                    <div class="form-group">
+                        <div class="form-group">
+                            <select class="form-control" name="existingChannel" id="existingChannels">
+                                <option value="welcome">Welcome</option>
+                            </select>
+                            <input class="btn" type="submit" value="Add">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+
+        <br>
 
         <div class="container" id="appContainer">
 
@@ -24,29 +77,17 @@
             <div class="container" id="channelContainer">
                 <div id="welcome" class="channel">
                     <h3>Welcome</h3>
-                    <div class="container chat">
+                    <div class="container chat" id="welcomeChat">
                         <p>This is the default channel for all users.</p>
                     </div>
                     <div class="channelFooter">
-                        <form class="submitNewMessage">
-                            <input class="form-control newMessage" type="text" placeholder="Write a message" name="message">
+                        <form class="submitNewMessage" id="welcomeForm">
+                            <input class="form-control newMessage" type="text" placeholder="Write a message" name="message" id="welcomeFormValue">
                             <input class="btn" type="submit" value="Enter">
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="centerBox">
-            <h5> Create new channel </h5>
-            <hr>
-            <form id="newChannelForm">
-                <div class="form-group">
-                    <input class="form-control" placeholder="Give me a name!" name="newChannel" id="newChannelName">
-                    <input class="btn" type="submit" value="Create">
-                </div> <!-- form-group// -->
-            </form>
-        </div>
-
     </body>
 </html>

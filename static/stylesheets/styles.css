@@ -1,6 +1,71 @@
 body {
     font-family: "Lato", sans-serif;
-    background-color: lightblue;
+    background-color: black;
+}
+
+h5 {
+    font-size: 18px;
+}
+
+/* User-input field */
+#usernameField {
+  width: 95%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  display: inline-block;
+  border: none;
+  background: #f1f1f1;
+}
+
+/* Signup button */
+.signupbtn {
+  width: 95%;
+  padding: 14px 20px;
+  border: none;
+  margin: 8px 0;
+}
+
+/* Popup */
+#popup {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 5; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #474e5d;
+  padding-top: 50px;
+  text-align: center;
+}
+
+/* Fonts in pop up */
+#popup h1, h2, h3, p {
+    text-align: center;
+}
+
+/* Pop-up Content/Box */
+.popup-content {
+  background-color: white;
+  max-width: 550px;
+  min-width: 300px;
+  margin: 5% auto 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+}
+
+/* Style the horizontal ruler */
+hr {
+  border: 1px solid #f1f1f1;
+  margin-bottom: 20px;
+}
+
+/* Clear floats */
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
 }
 
 #header {
@@ -17,11 +82,11 @@ body {
 }
 
 #appContainer {
-    margin-top: 40px;
-    width: 80%;
+    width: 800px;
     align-items: center;
     height: 600px;
-    padding: 0px;
+    margin-top: 40px;
+    margin-bottom: 40px;
 }
 
 #tabContainer {
@@ -108,6 +173,7 @@ body {
     padding: 10px;
     vertical-align: middle;
     border-top: 1px solid grey;
+    border-bottom: 1px solid grey;
 }
 
 .channelFooter .newMessage {
@@ -116,14 +182,12 @@ body {
 }
 
 .centerBox {
-    padding: 20px;
-    margin: auto;
+    padding: 10px;
     text-align: center;
-    max-width: 350px;
-    min-width: 250px;
+    width: 300px;
     background-color: white;
-    margin-top: 30px;
     border: 1px solid grey;
+    vertical-align: middle;
 }
 
 .btn {
@@ -133,7 +197,7 @@ body {
     margin: auto;
 }
 
-#newChannelForm .btn {
+.centerBox .btn {
     margin-top: 20px;
 }
 
@@ -144,4 +208,30 @@ body {
 .btn:hover {
     background-color: blue;
     color: white;
+}
+
+#userOptions {
+    position: relative;
+    min-width: 660px;
+    max-width: 660px;
+    padding-top: 40px;
+    height: 200px;
+}
+
+#newChannelAdd {
+    float: left;
+}
+
+#existingChannelSearch {
+    float: right;
+}
+
+/* Formatting for messages in channel */
+.messageHeader {
+    font-size: 16px;
+    font-weight: bold;
+    color: blue;
+}
+.messageContent {
+    font-size: 16px;
 }
