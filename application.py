@@ -37,15 +37,20 @@ def get_messages():
     try:
         channel_name = request.values.get('channel')
         channel_index = index_of_channel_stored(channel_name)
-        channel_object = channels[channel_index]
-        list_messages = channel_object.get_messages()
+
+        # handle weird case where local storage may hold channel not in server
+        if channel_index:
+            channel_object = channels[channel_index]
+            list_messages = channel_object.get_messages()
+            print(f"Got messages for {channel_object.name}: {list_messages}")
+        else:
+            list_messages = None
 
         result = {
             "success": True,
             "messages": list_messages
         }
 
-        print(f"Getting messages for {channel_object.name}: {result}")
         return jsonify(result)
 
     except Exception as e:

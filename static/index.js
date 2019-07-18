@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const existingChannel = document.querySelector('#existingChannels').value;
         createChannel(existingChannel);
         createChannelTab(existingChannel);
-        // loadExisting(existingChannel)
+        loadChannel(existingChannel);
 
         // reset the form, don't reload
         document.querySelector('#existingChannels').reset();
@@ -105,8 +105,17 @@ function launchExistingUser() {
     const listChannels = getListUserChannels()
 
     // ... then load in each channel
-    for (let channel in listChannels) {
-        loadChannel(listChannels[channel]);
+    for (let i in listChannels) {
+
+        var channel = listChannels[i];
+
+        // the welcome channel is the default, so already exists
+        if (channel != "welcome") {
+            debugger;
+            createNewChannel(channel);
+            createNewChannelTab(channel);
+        }
+        loadChannel(channel);
     }
     document.getElementById("defaultOpen").click();
 }
@@ -153,13 +162,11 @@ function loadChannel(channelName) {
    request.onload = () => {
 
        debugger;
-
        const data = JSON.parse(request.responseText);
-       const messageInfo = JSON.parse(data.messages);
 
-       debugger;
        if (data.success) {
-           if (messageInfo['messages'].length > 0) {
+           if (data.messages != null) {
+               const messageInfo = JSON.parse(data.messages);
                for (let message in messageInfo['messages']) {
                    loadMessageToChannel(messageInfo['messages'][message]);
                }
