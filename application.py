@@ -1,8 +1,9 @@
 import os
 import json
 from channel import Channel
+from helpers import format_date_string
 
-from flask import Flask, session, request, render_template, redirect, url_for, jsonify
+from flask import Flask, session, request, render_template, jsonify
 from flask_socketio import SocketIO, emit
 from flask_session import Session
 
@@ -17,17 +18,36 @@ Session(app)
 
 @app.route("/")
 def index():
-
-    session["available_channels"] = list();
-    session["available_channels"].append(Channel("welcome"));
-
     return render_template("index.html")
 
 
-@app.route("/api/load_channel")
-def load_channel(data):
-    channel_name = data['channel']
-    return render_template("index.html")
+@app.route("/api/messages", methods=["POST"])
+def get_messages():
+
+    if session["available_channels"] is None:
+        session["available_channels"] = list()
+        session["available_channels"].append(Channel("welcome"))
+
+    try:
+        channel_name = request.values.get('channel')
+        channel_index = index_of_channel_in_session(channel_name)
+        channel_object = session["available_channels"][channel_index]
+        list_messages = channel_object.get_messages()
+
+        result = {
+            "success": True,
+            "messages": list_messages
+        }
+
+        print(result)
+        return jsonify(result)
+
+    except Exception as e:
+        print(e)
+        result = {
+            "success": False,
+        }
+        return jsonify(result)
 
 
 @app.route("/api/create_user", methods=["POST"])
@@ -50,6 +70,10 @@ def check_username_available():
 @socketio.on("added channel")
 def available_channel(data):
 
+    if session["available_channels"] is None:
+        session["available_channels"] = list()
+        session["available_channels"].append(Channel("welcome"))
+
     session["available_channels"].append(Channel(data['channel']))
     emit("announce channel", {"new_channel": data['channel']}, broadcast=True)
 
@@ -63,7 +87,7 @@ def handle_message(data):
 
     # add the message to the channel_object
     channel_object.add_message(
-        user= data['user'],
+        user=data['user'],
         time=format_date_string(data['time']),
         content=data['message']
     )
@@ -91,7 +115,3 @@ def index_of_channel_in_session(channel_name):
             index_channel += 1
 
     return None
-
-
-def format_date_string(date_string):
-    return date_string.split('T')[0] + " " + date_string.split('T')[1][:8]

@@ -1,5 +1,6 @@
 from message import Message
 from datetime import datetime
+import json
 
 
 class Channel:
@@ -31,3 +32,22 @@ class Channel:
         :param user: username of new user
         """
         self.users.append(user)
+
+    def get_messages(self):
+
+        list_messages = [
+            {
+                "channel": self.name,
+                "user": message.user,
+                "message_header": message.user + " (" + message.time_created + "):",
+                "message": message.content
+
+            } for message in self.messages
+        ]
+
+        dict_messages = {
+            "channel": self.name,
+            "messages": list_messages
+        }
+
+        return json.dumps(dict_messages)

@@ -1,6 +1,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    debugger;
+
     // Connect to websocket
     var socket = io.connect(
         location.protocol + '//' + document.domain + ':' + location.port
@@ -41,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('added channel', {'channel': newChannelName});
 
         // save it as that user's channel
-        storeChannel(newChannelName);
+        storeUserChannel(newChannelName);
         return false;
     }
 
@@ -64,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#newUserForm').onsubmit = () => {
         const newUser = document.querySelector('#usernameField').value;
         createUser(newUser);
+        openApplication();
     }
 
     socket.on('announce channel', data => {
@@ -78,19 +81,30 @@ document.addEventListener('DOMContentLoaded', () => {
     // When a new user is added to a channel....
     socket.on('new message', data => {
         debugger;
-        addNewMessageToChannel(data);
+        const messageContent = JSON.parse(data);
+        loadMessageToChannel(messageContent);
     });
 
+    debugger;
     if (!localStorage.getItem('userIdentity')) {
+        console.log(localStorage.getItem('userIdentity'))
         document.getElementById('popup').style.display='block';
     } else {
-        // loadUserPage();
+        loadUserPage()
     }
 });
 
 // HELPER FUNCTIONS
 
 function loadUserPage() {
+
+    // get the list of channels associated with the user...
+    const listChannels = getListUserChannels()
+
+    // ... then load in each channel
+    for (let channel in listChannels) {
+        loadChannel(listChannels[channel]);
+    }
     document.getElementById("defaultOpen").click();
 }
 
@@ -105,12 +119,8 @@ function createUser(prospectiveUserName) {
         debugger;
         const data = JSON.parse(request.responseText);
 
-        console.log(data);
-
         if (data.available) {
             localStorage.setItem('userIdentity', prospectiveUserName);
-            document.getElementById('popup').style.display='none';
-            document.getElementById('defaultOpen').style.display = "block";
         } else {
             document.querySelector('#status').innerHTML = 'Username Already Taken.';
         }
@@ -122,6 +132,42 @@ function createUser(prospectiveUserName) {
    request.send(data);
 
    return false;
+}
+
+function openApplication() {
+    document.getElementById('popup').style.display='none';
+    storeUserChannel('welcome');
+    loadChannel('welcome');
+    document.getElementById('defaultOpen').style.display = "block";
+}
+
+function loadChannel(channelName) {
+    const request = new XMLHttpRequest();
+    request.open('POST', '/api/messages', false);
+
+    // Callback function for when request completes
+   request.onload = () => {
+
+       debugger;
+
+       const data = JSON.parse(request.responseText);
+       const messageInfo = JSON.parse(data.messages);
+
+       debugger;
+       if (data.success) {
+           if (messageInfo['messages'].length > 0) {
+               for (let message in messageInfo['messages']) {
+                   loadMessageToChannel(messageInfo['messages'][message]);
+               }
+           }
+       } else {
+           alert(`Warning! Something bad happened when attempting to load ${channelName}`);
+       }
+    }
+
+   const data = new FormData();
+   data.append('channel', channelName);
+   request.send(data);
 }
 
 // this helper function was inspired by Kyle Shevlin
@@ -161,7 +207,7 @@ function createNewChannel(channelName) {
             elementFactory (
                 'h3',
                 {},
-                `Channel: ${channelName}`
+                `${channelName}`
             )
         ),
         elementFactory (
@@ -263,9 +309,8 @@ function handleNewMessage(e) {
     );
 }
 
-function addNewMessageToChannel(response) {
+function loadMessageToChannel(data) {
 
-    const data = JSON.parse(response);
     var alignment;
 
     if (data.user === window.localStorage.getItem('userIdentity')) alignment = "right";
@@ -307,25 +352,19 @@ function addNewChannelOption(channelName) {
     document.querySelector('#existingChannels').append(option);
 }
 
-function storeChannel(channelName) {
+function storeUserChannel(channelName) {
 
-    if (localStorage.getItem('userChannels') === null) {
-        let arrayChannel = [channelName];
-        localStorage.setItem('userChannel', JSON.stringify(arrayChannel));
-    } else {
-        let channelArray = getListUserChannels()
-        channelArray.push(channelName)
-        localStorage.setItem('userChannel', JSON.stringify(channelArray))
-    }
+    var channelArray = getListUserChannels();
+    channelArray.push(channelName)
+    localStorage.setItem('userChannel', JSON.stringify(channelArray))
 }
 
 function getListUserChannels() {
-    var channels
 
-    if (localStorage.getItem('userChannels')) {
-      channels = JSON.parse(localStorage.getItem('userChannels'));
+    if (localStorage.getItem('userChannels') != null) {
+      var channels = JSON.parse(localStorage.getItem('userChannels'));
     } else {
-      channels = [];
+      var channels = ['welcome'];
     }
-    return channels
+    return channels;
 }
