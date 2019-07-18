@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#newChannelForm').onsubmit = () => {
 
+        debugger;
         // create new channel elements
         const newChannelName = document.querySelector('#newChannelName').value;
         createNewChannel(newChannelName);
@@ -146,6 +147,8 @@ function elementFactory(type, attributes, ...children) {
 // factory function for generating elements ()
 function createNewChannel(channelName) {
 
+    debugger;
+
     const newChannel = elementFactory (
         'div',
         {
@@ -153,9 +156,13 @@ function createNewChannel(channelName) {
             'id': channelName
         },
         elementFactory (
-            'h3',
-            {},
-            `Channel: ${channelName}`
+            'div',
+            {'class': 'channelHeader'},
+            elementFactory (
+                'h3',
+                {},
+                `Channel: ${channelName}`
+            )
         ),
         elementFactory (
             'div',
@@ -164,9 +171,13 @@ function createNewChannel(channelName) {
                 'id': `${channelName}Chat`
             },
             elementFactory (
-                'p',
-                {},
-                'Start your conversation...'
+                'div',
+                {'class': 'row'},
+                elementFactory (
+                    'p',
+                    {'class': 'messageContent'},
+                    'Start your conversation...'
+                )
             )
         ),
         elementFactory(
@@ -255,27 +266,35 @@ function handleNewMessage(e) {
 function addNewMessageToChannel(response) {
 
     const data = JSON.parse(response);
-
     var alignment;
+
     if (data.user === window.localStorage.getItem('userIdentity')) alignment = "right";
     else alignment = "left";
 
     const messageHeader = elementFactory (
-        'p',
-        {
-            'class': 'messageHeader',
-            'align': alignment
-        },
-        data.message_header
+        'div',
+        {},
+        elementFactory(
+            'p',
+            {
+                'class': 'messageHeader',
+                'style': `text-align: ${alignment}`
+            },
+            data.message_header
+        )
     );
 
     const messageContent = elementFactory (
-        'p',
-        {
-            'class': 'messageContent',
-            'align': alignment
-        },
-        data.message
+        'div',
+        {},
+        elementFactory(
+            'p',
+            {
+                'class': 'messageContent',
+                'style': `text-align: ${alignment}`
+            },
+            data.message
+        )
     );
     document.getElementById(`${data.channel}Chat`).appendChild(messageHeader);
     document.getElementById(`${data.channel}Chat`).appendChild(messageContent);

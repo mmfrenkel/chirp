@@ -1,6 +1,6 @@
 body {
     font-family: "Lato", sans-serif;
-    background-color: black;
+    background-color: purple;
 }
 
 h5 {
@@ -87,27 +87,32 @@ hr {
     height: 600px;
     margin-top: 40px;
     margin-bottom: 40px;
+    overflow: hidden;
+    border: 1px solid grey;
+    background-color: #f1f1f1;
+    padding: 0px;
 }
 
 #tabContainer {
     padding: 0px;
     height: 100%;
+    margin: 0px;
     width: 30%;
     height: 100%;
     background-color: #f1f1f1;
     float: left;
-    border: 1px solid grey;
     border-right: none;
+    overflow: hidden;
 }
 
 #channelContainer {
     padding: 0px;
+    margin: 0px;
     height: 100%;
     width: 70%;
-    border: 1px solid grey;
-    height: 100%;
     float: right;
     background-color: white;
+    overflow: hidden;
 }
 
 /* Style the tab */
@@ -154,13 +159,11 @@ hr {
 .channel h3 {
     padding: 10px;
     font-size: 20px;
-    color: blue;
     text-align: center;
 }
 
 .channel .chat {
     width: 100%;
-    display: flex;
     padding-bottom: 2.5rem;
 }
 
@@ -172,8 +175,6 @@ hr {
     width: 100%;
     padding: 10px;
     vertical-align: middle;
-    border-top: 1px solid grey;
-    border-bottom: 1px solid grey;
 }
 
 .channelFooter .newMessage {
@@ -186,7 +187,6 @@ hr {
     text-align: center;
     width: 300px;
     background-color: white;
-    border: 1px solid grey;
     vertical-align: middle;
 }
 
@@ -226,12 +226,31 @@ hr {
     float: right;
 }
 
+.channelHeader {
+    background-color: lightblue;
+    text-align: center;
+    height: 50px;
+    margin-bottom: 20px;
+}
+
 /* Formatting for messages in channel */
-.messageHeader {
+.chat .messageHeader {
+    display: inline-block;
+    width: 100%;
     font-size: 16px;
     font-weight: bold;
     color: blue;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 7px;
+    margin-bottom: 0px;
 }
-.messageContent {
+.chat .messageContent {
+    display: inline-block;
+    width: 100%;
     font-size: 16px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
