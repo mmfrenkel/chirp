@@ -22,6 +22,9 @@ class Channel:
         """
         self.messages.append(Message(user=user, time_created=time, content=content))
 
+        for message in self.messages:
+            print(message)
+
         # once 100 messages is met, pop the oldest message off
         if len(self.messages) > 100:
             self.messages.pop(0)

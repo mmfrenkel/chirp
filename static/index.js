@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'message': document.getElementById(event.target.id + "Value").value
                 }
             );
+            document.getElementById(event.target.id + "Value").value = "";
             return false;
         }
     })
@@ -64,9 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.querySelector('#newUserForm').onsubmit = () => {
+        debugger;
         const newUser = document.querySelector('#usernameField').value;
-        createUser(newUser);
-        openApplication();
+        launchNewUser(newUser);
     }
 
     socket.on('announce channel', data => {
@@ -90,14 +91,16 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(localStorage.getItem('userIdentity'))
         document.getElementById('popup').style.display='block';
     } else {
-        loadUserPage()
+        debugger;
+        launchExistingUser()
     }
 });
 
 // HELPER FUNCTIONS
 
-function loadUserPage() {
+function launchExistingUser() {
 
+    debugger;
     // get the list of channels associated with the user...
     const listChannels = getListUserChannels()
 
@@ -108,7 +111,7 @@ function loadUserPage() {
     document.getElementById("defaultOpen").click();
 }
 
-function createUser(prospectiveUserName) {
+function launchNewUser(prospectiveUserName) {
 
     const request = new XMLHttpRequest();
     request.open('POST', '/api/create_user', false);
@@ -120,7 +123,8 @@ function createUser(prospectiveUserName) {
         const data = JSON.parse(request.responseText);
 
         if (data.available) {
-            localStorage.setItem('userIdentity', prospectiveUserName);
+            window.localStorage.setItem('userIdentity', prospectiveUserName);
+            startApplication();
         } else {
             document.querySelector('#status').innerHTML = 'Username Already Taken.';
         }
@@ -134,7 +138,7 @@ function createUser(prospectiveUserName) {
    return false;
 }
 
-function openApplication() {
+function startApplication() {
     document.getElementById('popup').style.display='none';
     storeUserChannel('welcome');
     loadChannel('welcome');
@@ -296,19 +300,6 @@ function openChannel() {
     this.className += " active";
 }
 
-function handleNewMessage(e) {
-
-    socket.emit(
-        'handle message',
-        {
-            'channel': e.target.id.split("Form")[0],
-            'user': localStorage.get('userIdentity'),
-            'time': (new Date).toISOString(),
-            'message': document.getElementById(e.target.id + "Value").value
-        }
-    );
-}
-
 function loadMessageToChannel(data) {
 
     var alignment;
@@ -354,17 +345,25 @@ function addNewChannelOption(channelName) {
 
 function storeUserChannel(channelName) {
 
+    // get the existing list of user channels
     var channelArray = getListUserChannels();
-    channelArray.push(channelName)
-    localStorage.setItem('userChannel', JSON.stringify(channelArray))
+
+    // if not already in the channel, push the new channel to the list and reset localStorage item
+    if (!channelArray.includes(channelName)) channelArray.push(channelName)
+
+    localStorage.setItem('userChannels', JSON.stringify(channelArray))
 }
 
 function getListUserChannels() {
 
+
     if (localStorage.getItem('userChannels') != null) {
-      var channels = JSON.parse(localStorage.getItem('userChannels'));
+
+        // parse elements of localStorage into a list object
+        var channels = JSON.parse(localStorage.getItem('userChannels'));
     } else {
-      var channels = ['welcome'];
+        // odd case, where the user startApplication() method fails but user is created.
+        var channels = ['welcome'];
     }
     return channels;
 }

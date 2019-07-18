@@ -9,11 +9,14 @@ from flask_session import Session
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
-app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 
 socketio = SocketIO(app)
 Session(app)
+
+# store the users and channels from each session
+channels = []
+users = []
 
 
 @app.route("/")
@@ -24,14 +27,17 @@ def index():
 @app.route("/api/messages", methods=["POST"])
 def get_messages():
 
-    if session["available_channels"] is None:
-        session["available_channels"] = list()
-        session["available_channels"].append(Channel("welcome"))
+    # testing purposes only
+    for channel in channels:
+        print(f"Channel: {channel.name}: Messages: {channel.get_messages()}")
+
+    if not channels:
+        channels.append(Channel("welcome"))
 
     try:
         channel_name = request.values.get('channel')
-        channel_index = index_of_channel_in_session(channel_name)
-        channel_object = session["available_channels"][channel_index]
+        channel_index = index_of_channel_stored(channel_name)
+        channel_object = channels[channel_index]
         list_messages = channel_object.get_messages()
 
         result = {
@@ -39,7 +45,7 @@ def get_messages():
             "messages": list_messages
         }
 
-        print(result)
+        print(f"Getting messages for {channel_object.name}: {result}")
         return jsonify(result)
 
     except Exception as e:
@@ -54,13 +60,9 @@ def get_messages():
 def check_username_available():
 
     prospective_username = request.form.get('username')
+    if not users or prospective_username not in users:
 
-    if session.get('app_users') is None or prospective_username not in session.get('app_users'):
-
-        if session.get('app_users') is None:
-            session['app_users'] = list()
-
-        session['app_users'].append(prospective_username)
+        users.append(prospective_username)
         return jsonify(available=True)
 
     else:
@@ -70,20 +72,19 @@ def check_username_available():
 @socketio.on("added channel")
 def available_channel(data):
 
-    if session["available_channels"] is None:
-        session["available_channels"] = list()
-        session["available_channels"].append(Channel("welcome"))
+    if not channels:
+        channels.append(Channel("welcome"))
 
-    session["available_channels"].append(Channel(data['channel']))
+    channels.append(Channel(data['channel']))
     emit("announce channel", {"new_channel": data['channel']}, broadcast=True)
 
 
 @socketio.on("handle message")
 def handle_message(data):
 
-    # get the channel object from the session
-    channel_index = index_of_channel_in_session(data['channel'])
-    channel_object = session["available_channels"][channel_index]
+    # get the channel object from the list of channels
+    channel_index = index_of_channel_stored(data['channel'])
+    channel_object = channels[channel_index]
 
     # add the message to the channel_object
     channel_object.add_message(
@@ -91,7 +92,9 @@ def handle_message(data):
         time=format_date_string(data['time']),
         content=data['message']
     )
-    session["available_channels"][channel_index] = channel_object
+
+    # reset channel object at location
+    channels[channel_index] = channel_object
 
     message_content = {
         "channel": data['channel'],
@@ -100,18 +103,19 @@ def handle_message(data):
         "message": data['message']
     }
 
-    #  emit("new message", message_content, broadcast=True)
+    print(f"Adding this a message to {channel_object.name}: {message_content}")
     emit("new message", json.dumps(message_content), broadcast=True)
 
 
-def index_of_channel_in_session(channel_name):
+def index_of_channel_stored(channel_name):
 
     index_channel = 0
 
-    for channel in session["available_channels"]:
+    for channel in channels:
         if channel.name == channel_name:
             return index_channel
         else:
             index_channel += 1
 
     return None
+
