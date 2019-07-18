@@ -89,6 +89,12 @@ def handle_message(data):
 
     # get the channel object from the list of channels
     channel_index = index_of_channel_stored(data['channel'])
+
+    # if channel index doesn't yet exist, create the object to get the index
+    if channel_index is None:
+        channels.append(Channel(data['channel']))
+        channel_index = len(channels) - 1  # order of elements in list persists
+
     channel_object = channels[channel_index]
 
     # add the message to the channel_object
@@ -115,12 +121,9 @@ def handle_message(data):
 def index_of_channel_stored(channel_name):
 
     index_channel = 0
-
     for channel in channels:
         if channel.name == channel_name:
             return index_channel
         else:
             index_channel += 1
-
     return None
-
