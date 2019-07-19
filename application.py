@@ -15,7 +15,7 @@ socketio = SocketIO(app)
 Session(app)
 
 # store the users and channels from each session
-channels = []
+channels = [Channel("welcome")] # this is the default
 users = []
 
 
@@ -28,22 +28,21 @@ def index():
 def get_messages():
 
     # testing purposes only
-    for channel in channels:
-        print(f"Channel: {channel.name}: Messages: {channel.get_messages()}")
-
-    if not channels:
-        channels.append(Channel("welcome"))
+    # for channel in channels:
+    #    print(f"Channel: {channel.name}: Messages: {channel.get_messages()}")
 
     try:
         channel_name = request.values.get('channel')
         channel_index = index_of_channel_stored(channel_name)
 
-        # handle weird case where local storage may hold channel not in server
-        if channel_index:
+        print(channel_index)
+
+        if channel_index is not None:
             channel_object = channels[channel_index]
             list_messages = channel_object.get_messages()
             print(f"Got messages for {channel_object.name}: {list_messages}")
         else:
+            # handle weird case where local storage may hold channel not in server
             list_messages = None
 
         result = {
@@ -76,9 +75,6 @@ def check_username_available():
 
 @socketio.on("added channel")
 def available_channel(data):
-
-    if not channels:
-        channels.append(Channel("welcome"))
 
     channels.append(Channel(data['channel']))
     emit("announce channel", {"new_channel": data['channel']}, broadcast=True)
