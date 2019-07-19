@@ -120,13 +120,13 @@ hr {
 /***** APP CONTAINER/CHANNELS*****/
 
 #appContainer {
-    width: 800px;
+    width: 900px;
     align-items: center;
-    height: 600px;
+    height: 700px;
     margin-top: 40px;
     margin-bottom: 40px;
     overflow: hidden;
-    border: 1px solid grey;
+    border: 1px solid lightgrey;
     background-color: #f1f1f1;
     padding: 0px;
 }
@@ -139,7 +139,7 @@ hr {
     height: 100%;
     background-color: #f1f1f1;
     float: left;
-    border-right: none;
+    border-top: 1px solid lightgrey;
     overflow: hidden;
 }
 
@@ -151,13 +151,14 @@ hr {
     float: right;
     background-color: white;
     overflow: hidden;
+    border-top: 1px solid lightgrey;
 }
 
 /* Style the tab */
 .tab {
     float: left;
     background-color: #f1f1f1;
-    height: 300px;
+    height: 180px;
     padding: 0px;
     width: 100%;
     border: none;
@@ -210,8 +211,7 @@ hr {
 .channelHeader {
     background-color: #FAE392;
     font-weight: bold;
-    height: 50px;
-    margin-bottom: 20px;
+    margin-bottom: 0px;
 }
 
 /* Formatting for messages in channel */
