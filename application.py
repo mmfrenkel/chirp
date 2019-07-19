@@ -15,7 +15,7 @@ socketio = SocketIO(app)
 Session(app)
 
 # store the users and channels from each session, starting with default "welcome"
-channels = [Channel(visible_name="welcome", cleaned_name="welcome")]
+channels = [Channel(visible_name="Welcome", cleaned_name="Welcome")]
 users = []
 
 
@@ -72,8 +72,17 @@ def check_username_available():
         return jsonify(available=False)
 
 
+@app.route("/api/available_channels", methods=["POST"])
+def available_channels():
+
+    channel_names = [channel.name for channel in channels]
+    print(f"Here is the list of available channels: {channel_names}")
+
+    return jsonify(availableChannels=channel_names)
+
+
 @socketio.on("added channel")
-def available_channel(data):
+def add_channel(data):
 
     channel_name = data['channelName']
     cleaned_channel_name = data['cleanedChannelName']
@@ -82,7 +91,6 @@ def available_channel(data):
     )
     print(f"Added this channel: {channel_name}")
     emit("announce channel", {"new_channel": channel_name}, broadcast=True)
-
 
 @socketio.on("handle message")
 def handle_message(data):

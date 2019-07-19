@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(localStorage.getItem('userIdentity'))
         document.getElementById('popup').style.display='block';
     } else {
-        debugger;
         launchExistingUser()
     }
 });
@@ -95,20 +94,17 @@ function launchExistingUser() {
 
     debugger;
     // get the list of channels associated with the user...
-    const listChannels = getListUserChannels()
+    loadAvailableChannels();
+    const listChannels = getListUserChannels();
 
     // ... then load in each channel
     for (let i in listChannels) {
 
         var channelName = listChannels[i];
-
-        // the welcome channel is the default, so already exists
-        if (channelName != "welcome") {
-            debugger;
+        if (channelName != "Welcome") {  // the Welcome channel is the default on the page, so already exists
             createNewChannel(channelName);
             createNewChannelTab(channelName);
         }
-        debugger;
         loadChannel(channelName);
     }
     document.getElementById("defaultOpen").click();
@@ -122,30 +118,24 @@ function launchNewUser(prospectiveUserName) {
     // Callback function for when request completes
    request.onload = () => {
 
-        debugger;
-        const data = JSON.parse(request.responseText);
+       const data = JSON.parse(request.responseText);
 
-        if (data.available) {
-            window.localStorage.setItem('userIdentity', prospectiveUserName);
-            startApplication();
-        } else {
-            document.querySelector('#status').innerHTML = 'Username Already Taken.';
+       if (data.available) {
+           // setup for new user
+           window.localStorage.setItem('userIdentity', prospectiveUserName);
+           document.getElementById('popup').style.display='none';
+           storeUserChannel('Welcome');
+           loadChannel('Welcome');
+           loadAvailableChannels();
+           document.getElementById('defaultOpen').style.display = "block";
+
+       } else {
+           document.querySelector('#status').innerHTML = 'Username Already Taken.';
         }
     }
-
-   debugger;
    const data = new FormData();
    data.append('username', prospectiveUserName);
    request.send(data);
-
-   return false;
-}
-
-function startApplication() {
-    document.getElementById('popup').style.display='none';
-    storeUserChannel('welcome');
-    loadChannel('welcome');
-    document.getElementById('defaultOpen').style.display = "block";
 }
 
 function loadChannel(channelName) {
@@ -310,10 +300,15 @@ function openChannel() {
 
 function loadMessageToChannel(data) {
 
-    var alignment;
+    var alignment, type;
 
-    if (data.user === window.localStorage.getItem('userIdentity')) alignment = "right";
-    else alignment = "left";
+    if (data.user === window.localStorage.getItem('userIdentity')) {
+        alignment = "right";
+        type = "self";
+    } else {
+        alignment = "left";
+        type = "other";
+    }
 
     const messageHeader = elementFactory (
         'div',
@@ -321,7 +316,7 @@ function loadMessageToChannel(data) {
         elementFactory(
             'p',
             {
-                'class': 'messageHeader',
+                'class': `messageHeader ${type}`,
                 'style': `text-align: ${alignment}`
             },
             data.message_header
@@ -362,14 +357,10 @@ function storeUserChannel(channelName) {
 
 function getListUserChannels() {
 
-
     if (localStorage.getItem('userChannels') != null) {
-
-        // parse elements of localStorage into a list object
         var channels = JSON.parse(localStorage.getItem('userChannels'));
     } else {
-        // odd case, where the user startApplication() method fails but user is created.
-        var channels = ['welcome'];
+        var channels = ['Welcome']; // startApplication() case
     }
     return channels;
 }
@@ -394,4 +385,20 @@ function emitMessage(e) {
     );
     document.getElementById(e.target.id + "Value").value = "";
     return false;
+}
+
+function loadAvailableChannels() {
+
+    const request = new XMLHttpRequest();
+    request.open('POST', '/api/available_channels', false);
+
+    // Callback function for when request completes
+   request.onload = () => {
+       debugger;
+       const data = JSON.parse(request.responseText);
+       for (let channelName in data.availableChannels) {
+           addNewChannelOption(data.availableChannels[channelName])
+       }
+    }
+   request.send();
 }

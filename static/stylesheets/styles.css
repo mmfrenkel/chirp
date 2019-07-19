@@ -1,11 +1,59 @@
+/***** HEADER AND LOGO COMPONENTS *****/
+
 body {
     font-family: "Lato", sans-serif;
-    background-color: purple;
+    background-color: #7dadfa;
 }
 
 h5 {
     font-size: 18px;
 }
+
+.fa {
+    color: #055eed;
+}
+
+#header {
+    width: 100%;
+    align-items: center;
+    min-height: 50px;
+    background-color: #fae392;
+    color: #055eed;
+}
+
+#logo {
+    width: 90px;
+}
+
+#header h2 {
+    font-size: 40px;
+    text-align: center;
+    padding: 20px;
+}
+
+/***** SIGN UP INFORMATION *****/
+
+.btn {
+    background-color: #97b9f0;
+    border: #97b9f0;
+    color: white;
+    margin: auto;
+}
+
+.centerBox .btn {
+    margin-top: 20px;
+}
+
+.channelFooter .btn {
+    float: right;
+}
+
+.btn:hover {
+    background-color: #2872eb;
+    color: white;
+}
+
+/***** SIGN UP COMPONENTS *****/
 
 /* User-input field */
 #usernameField {
@@ -68,18 +116,8 @@ hr {
   display: table;
 }
 
-#header {
-    width: 100%;
-    align-items: center;
-    min-height: 50px;
-    background-color: white;
-}
 
-#header h2 {
-    font-size: 40px;
-    text-align: center;
-    padding: 20px;
-}
+/***** APP CONTAINER/CHANNELS*****/
 
 #appContainer {
     width: 800px;
@@ -169,6 +207,45 @@ hr {
     overflow: auto;
 }
 
+.channelHeader {
+    background-color: #FAE392;
+    font-weight: bold;
+    height: 50px;
+    margin-bottom: 20px;
+}
+
+/* Formatting for messages in channel */
+.chat .messageHeader {
+    display: inline-block;
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
+    padding-left: 15px;
+    padding-right: 20px;
+    margin-top: 7px;
+    margin-bottom: 0px;
+}
+
+.chat .messageContent {
+    display: inline-block;
+    width: 100%;
+    font-size: 16px;
+    padding-left: 15px;
+    padding-right: 20px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.chat .self {
+    color: #fa92a9;
+}
+
+.chat .other {
+    color: #7dadfa;
+}
+
+/* Channel Footer */
+
 .channel .channelFooter {
     position: absolute;
     bottom: 0;
@@ -192,25 +269,7 @@ hr {
     vertical-align: middle;
 }
 
-.btn {
-    background-color: lightblue;
-    border: lightblue;
-    color: white;
-    margin: auto;
-}
-
-.centerBox .btn {
-    margin-top: 20px;
-}
-
-.channelFooter .btn {
-    float: right;
-}
-
-.btn:hover {
-    background-color: blue;
-    color: white;
-}
+/***** USER OPTIONS, CHANNEL ADDITIONS *****/
 
 #userOptions {
     position: relative;
@@ -228,31 +287,6 @@ hr {
     float: right;
 }
 
-.channelHeader {
-    background-color: lightblue;
-    text-align: center;
-    height: 50px;
-    margin-bottom: 20px;
-}
-
-/* Formatting for messages in channel */
-.chat .messageHeader {
-    display: inline-block;
-    width: 100%;
-    font-size: 16px;
-    font-weight: bold;
-    color: blue;
-    padding-left: 20px;
-    padding-right: 20px;
-    margin-top: 7px;
-    margin-bottom: 0px;
-}
-.chat .messageContent {
-    display: inline-block;
-    width: 100%;
-    font-size: 16px;
-    padding-left: 20px;
-    padding-right: 20px;
-    margin-top: 0px;
-    margin-bottom: 0px;
+option {
+    background-color: #FAE392;
 }
