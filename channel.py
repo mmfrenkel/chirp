@@ -5,8 +5,9 @@ import json
 
 class Channel:
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, visible_name, cleaned_name):
+        self.name = visible_name
+        self.cleaned_name = cleaned_name
         self.messages = list()
         self.users = list()
         self.date_created = datetime.now()
@@ -40,7 +41,8 @@ class Channel:
 
         list_messages = [
             {
-                "channel": self.name,
+                "channelName": self.name,
+                "cleanedChannelName": self.cleaned_name,
                 "user": message.user,
                 "message_header": message.user + " (" + message.time_created + "):",
                 "message": message.content

@@ -14,8 +14,8 @@ app.config["SESSION_TYPE"] = "filesystem"
 socketio = SocketIO(app)
 Session(app)
 
-# store the users and channels from each session
-channels = [Channel("welcome")] # this is the default
+# store the users and channels from each session, starting with default "welcome"
+channels = [Channel(visible_name="welcome", cleaned_name="welcome")]
 users = []
 
 
@@ -32,17 +32,16 @@ def get_messages():
     #    print(f"Channel: {channel.name}: Messages: {channel.get_messages()}")
 
     try:
-        channel_name = request.values.get('channel')
+        channel_name = request.values.get('channelName')
         channel_index = index_of_channel_stored(channel_name)
-
-        print(channel_index)
 
         if channel_index is not None:
             channel_object = channels[channel_index]
             list_messages = channel_object.get_messages()
             print(f"Got messages for {channel_object.name}: {list_messages}")
         else:
-            # handle weird case where local storage may hold channel not in server
+            # handle weird case where local storage may still hold channel,
+            # but it's not in the restarted server
             list_messages = None
 
         result = {
@@ -76,19 +75,29 @@ def check_username_available():
 @socketio.on("added channel")
 def available_channel(data):
 
-    channels.append(Channel(data['channel']))
-    emit("announce channel", {"new_channel": data['channel']}, broadcast=True)
+    channel_name = data['channelName']
+    cleaned_channel_name = data['cleanedChannelName']
+    channels.append(
+        Channel(visible_name=channel_name, cleaned_name=cleaned_channel_name)
+    )
+    print(f"Added this channel: {channel_name}")
+    emit("announce channel", {"new_channel": channel_name}, broadcast=True)
 
 
 @socketio.on("handle message")
 def handle_message(data):
 
     # get the channel object from the list of channels
-    channel_index = index_of_channel_stored(data['channel'])
+    channel_name = data['channelName']
+    cleaned_channel_name = data['cleanedChannelName']
+    channel_index = index_of_channel_stored(channel_name)
 
     # if channel index doesn't yet exist, create the object to get the index
     if channel_index is None:
-        channels.append(Channel(data['channel']))
+        channels.append(
+            Channel(visible_name=channel_name, cleaned_name=cleaned_channel_name)
+        )
+        print(f"While handling message, added this channel: {channel_name}")
         channel_index = len(channels) - 1  # order of elements in list persists
 
     channel_object = channels[channel_index]
@@ -104,7 +113,7 @@ def handle_message(data):
     channels[channel_index] = channel_object
 
     message_content = {
-        "channel": data['channel'],
+        "cleanedChannelName": cleaned_channel_name,
         "user": data['user'],
         "message_header":  data['user'] + " (" + format_date_string(data['time']) + "):",
         "message": data['message']

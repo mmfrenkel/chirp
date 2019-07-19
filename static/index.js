@@ -13,38 +13,31 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
     document.querySelectorAll('.submitNewMessage').forEach(form => {
-        form.onsubmit = (event) => {
-            debugger;
-            socket.emit(
-                'handle message',
-                {
-                    'channel': event.target.id.split("Form")[0],
-                    'user': window.localStorage.getItem('userIdentity'),
-                    'time': (new Date).toISOString(),
-                    'message': document.getElementById(event.target.id + "Value").value
-                }
-            );
-            document.getElementById(event.target.id + "Value").value = "";
-            return false;
-        }
+        form.onsubmit = emitMessage;
     })
 
     document.querySelector('#newChannelForm').onsubmit = () => {
 
         debugger;
         // create new channel elements
-        const newChannelName = document.querySelector('#newChannelName').value;
-        createNewChannel(newChannelName);
-        createNewChannelTab(newChannelName);
+        const channelName = document.querySelector('#newChannelName').value;
+        createNewChannel(channelName);
+        createNewChannelTab(channelName);
 
         // reset the form, don't reload
         document.querySelector('#newChannelForm').reset();
 
         // now tell the server a new channel is available
-        socket.emit('added channel', {'channel': newChannelName});
+        socket.emit(
+            'added channel',
+            {
+                'channelName': channelName,
+                'cleanedChannelName': channelName.replace(/\W/g, '')
+            }
+        );
 
         // save it as that user's channel
-        storeUserChannel(newChannelName);
+        storeUserChannel(channelName);
         return false;
     }
 
@@ -60,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#existingChannels').reset();
 
         // now tell the server a new channel is available
-        socket.emit('user requested channel', {'channel': existingChannel, 'user': userName});
-        return false;
+        //socket.emit('user requested channel', {'channel': existingChannel, 'user': userName});
+        // return false;
     }
 
     document.querySelector('#newUserForm').onsubmit = () => {
@@ -107,15 +100,16 @@ function launchExistingUser() {
     // ... then load in each channel
     for (let i in listChannels) {
 
-        var channel = listChannels[i];
+        var channelName = listChannels[i];
 
         // the welcome channel is the default, so already exists
-        if (channel != "welcome") {
+        if (channelName != "welcome") {
             debugger;
-            createNewChannel(channel);
-            createNewChannelTab(channel);
+            createNewChannel(channelName);
+            createNewChannelTab(channelName);
         }
-        loadChannel(channel);
+        debugger;
+        loadChannel(channelName);
     }
     document.getElementById("defaultOpen").click();
 }
@@ -177,7 +171,7 @@ function loadChannel(channelName) {
     }
 
    const data = new FormData();
-   data.append('channel', channelName);
+   data.append('channelName', channelName);
    request.send(data);
 }
 
@@ -205,12 +199,13 @@ function elementFactory(type, attributes, ...children) {
 function createNewChannel(channelName) {
 
     debugger;
+    const cleanedChannelName = channelName.replace(/\W/g, '');
 
     const newChannel = elementFactory (
         'div',
         {
             'class': 'channel',
-            'id': channelName
+            'id': cleanedChannelName
         },
         elementFactory (
             'div',
@@ -225,7 +220,7 @@ function createNewChannel(channelName) {
             'div',
             {
                 'class': 'container chat',
-                'id': `${channelName}Chat`
+                'id': `${cleanedChannelName}Chat`
             },
             elementFactory (
                 'div',
@@ -244,7 +239,8 @@ function createNewChannel(channelName) {
                 'form',
                 {
                     'class': 'submitNewMessage',
-                    'id': `${channelName}Form`
+                    'id': `${cleanedChannelName}Form`,
+                    'data-channelname': channelName
                 },
                 elementFactory(
                     'input',
@@ -253,7 +249,7 @@ function createNewChannel(channelName) {
                         'type': 'text',
                         'placeholder': 'Write a message',
                         'name': 'message',
-                        'id': `${channelName}FormValue`
+                        'id': `${cleanedChannelName}FormValue`
                     },
                     null
                 ),
@@ -269,8 +265,13 @@ function createNewChannel(channelName) {
             )
         )
     );
+
+    debugger;
     newChannel.style.display = "none";
     document.getElementById("channelContainer").appendChild(newChannel);
+
+    // now add the button's 'send' action
+    document.querySelector(`#${cleanedChannelName}Form`).onsubmit = emitMessage;
 }
 
 function createNewChannelTab(channelName) {
@@ -296,7 +297,7 @@ function openChannel() {
     }
     // the data-channelName attribute of the button = the id of the content box to display
     const channelName = this.dataset.channelname
-    document.getElementById(channelName).style.display = "block";
+    document.getElementById(channelName.replace(/\W/g, '')).style.display = "block";
 
     // change all buttons to inactive, except "this" button
     const channelTabs = document.getElementsByClassName("channelTab");
@@ -339,8 +340,8 @@ function loadMessageToChannel(data) {
             data.message
         )
     );
-    document.getElementById(`${data.channel}Chat`).appendChild(messageHeader);
-    document.getElementById(`${data.channel}Chat`).appendChild(messageContent);
+    document.getElementById(`${data.cleanedChannelName}Chat`).appendChild(messageHeader);
+    document.getElementById(`${data.cleanedChannelName}Chat`).appendChild(messageContent);
 }
 
 function addNewChannelOption(channelName) {
@@ -352,10 +353,8 @@ function addNewChannelOption(channelName) {
 
 function storeUserChannel(channelName) {
 
-    // get the existing list of user channels
+    // get the existing list of user channels and push new name onto it
     var channelArray = getListUserChannels();
-
-    // if not already in the channel, push the new channel to the list and reset localStorage item
     if (!channelArray.includes(channelName)) channelArray.push(channelName)
 
     localStorage.setItem('userChannels', JSON.stringify(channelArray))
@@ -373,4 +372,26 @@ function getListUserChannels() {
         var channels = ['welcome'];
     }
     return channels;
+}
+
+function emitMessage(e) {
+
+    // Connect to websocket
+    var socketMessage = io.connect(
+        location.protocol + '//' + document.domain + ':' + location.port
+    );
+
+    debugger;
+    socketMessage.emit(
+        'handle message',
+        {
+            'channelName': e.target.dataset.channelname,
+            'cleanedChannelName': e.target.id.split("Form")[0],
+            'user': window.localStorage.getItem('userIdentity'),
+            'time': (new Date).toISOString(),
+            'message': document.getElementById(e.target.id + "Value").value
+        }
+    );
+    document.getElementById(e.target.id + "Value").value = "";
+    return false;
 }
