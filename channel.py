@@ -1,3 +1,6 @@
+"""
+Defines Channel() helper class.
+"""
 from message import Message
 from datetime import datetime
 import json
@@ -12,7 +15,7 @@ class Channel:
         self.users = list()
         self.date_created = datetime.now()
 
-    def add_message(self, user, time, content, type):
+    def add_message(self, user, time, content, message_type):
         """
         Adds a new message object to the list of Messages in this channel. Channel can only hold
         100 messages at a time; older messages will be removed.
@@ -26,7 +29,7 @@ class Channel:
                 user=user,
                 time_created=time,
                 content=content,
-                type=type
+                message_type=message_type
             )
         )
 
@@ -45,6 +48,12 @@ class Channel:
         self.users.append(user)
 
     def get_messages(self):
+        """
+        Formats all stored messages and their content as a list of dictionary objects
+        and returns a json string.
+
+        :return: json string containing list of messages
+        """
 
         list_messages = [
             {
@@ -53,7 +62,7 @@ class Channel:
                 "user": message.user,
                 "message_header": message.user + " (" + message.time_created + "):",
                 "message": message.content,
-                "type": message.type
+                "type": message.message_type
             } for message in self.messages
         ]
 

@@ -12,7 +12,7 @@
     <body>
         <div id="header">
             <h2>Chirp!
-                <img id="logo" src="{{ url_for('static', filename='img/bird-icon.png') }}">
+                <img class="logo" src="{{ url_for('static', filename='img/bird-icon.png') }}">
             </h2>
         </div>
 
@@ -20,7 +20,7 @@
             <div class="container popup-content">
                 <h2>Welcome to Chirp!</h2>
                 <h2>
-                    <img id="logo" src="{{ url_for('static', filename='img/bird-icon.png') }}">
+                    <img class="logo" src="{{ url_for('static', filename='img/bird-icon.png') }}">
                 </h2>
                 <h5 id="status" >Let's start off by setting a username for you.</h5>
               	<hr>
@@ -32,6 +32,8 @@
                 </form>
             </div>
         </div>
+
+        <h4>An application for chatting with odd birds like you.</h4>
 
         <div class="container" id="userOptions">
 

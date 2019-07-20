@@ -5,12 +5,23 @@ body {
     background-color: #7dadfa;
 }
 
+h4 {
+    font-size: 20px;
+    text-align: center;
+    margin-top: 25px;
+    color: white;
+}
+
 h5 {
     font-size: 18px;
 }
 
 .fa {
     color: #055eed;
+}
+
+.logo {
+    width: 80px;
 }
 
 #header {
@@ -21,15 +32,12 @@ h5 {
     color: #055eed;
 }
 
-#logo {
-    width: 80px;
-}
-
 #header h2 {
     font-size: 40px;
     text-align: center;
     padding: 20px;
 }
+
 
 /***** BUTTONS! *****/
 
@@ -287,7 +295,7 @@ hr {
     position: relative;
     min-width: 660px;
     max-width: 660px;
-    padding-top: 40px;
+    padding-top: 30px;
     height: 200px;
 }
 
