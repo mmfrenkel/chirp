@@ -36,20 +36,23 @@ Any newly created or added channels will line up on the left of the main chat bo
 Users can simply click on any given channel name, functioning like a tab, to open up that channel.
 
 Once a user is active in channels, they can expect two types of notifications:
-* When a new user is added to a channel, they will notified with a small grey message in the
+1. When a new user is added to a channel, they will notified with a small grey message in the
 center of the chat application. 
-* When a new message is loaded into a channel _that isn't already open_, the left Channel tab 
+2. When a new message is loaded into a channel _that isn't already open_, the left Channel tab 
 will become bold. Once the user clicks on this channel to read the message, the flag will clear.
 
 See examples of both notifications in the screenshot below, with `Meg's Channel` having an unread notification
-and two instances where new users, `mfrenkel` and `andrewgrant243` joined the channel.
+and two instances of messages when `andrewgrant243` and `mfrenkel` joined the channel (note `mfrenkel` is 
+shown as `You` because this window represents `mfrenkel`'s window).
+
 
 <p align="center">
   <img src="./site_images/app-with-messages.png" width="700" title="App With Messages">
 </p>
 
 The message box will scroll, such that conversation lengths are not limited
-to the size of the screen. However, the server will only preserve the most recent 100 messages.
+to the size of the screen. However, the server will only preserve the most recent 100 messages
+for each channel.
 
 ## III. Components
 
