@@ -75,7 +75,7 @@ def available_channels():
     return jsonify(availableChannels=channel_names)
 
 
-@socketio.on("available channel")
+@socketio.on("new channel")
 def add_channel(data):
 
     print('HELLO I MADE IT HERE!!!')

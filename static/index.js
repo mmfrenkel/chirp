@@ -18,11 +18,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelector('#newChannelForm').onsubmit = () => {
 
-        debugger;
         const channelName = document.querySelector('#newChannelName').value;
 
         addNewChannel(channelName);               // create the channel in UI
         addNewChannelTab(channelName);            // create the tab in UI
+
+        debugger;
         emitNewAvailableChannel(channelName);     // tell the server a new channel is available
         addUserChannel(channelName);              // keep track of channels belonging to user
         reportNewChannelUser(channelName);        // tell the server about the new user
@@ -44,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // reset the form, don't reload
         document.querySelector('#existingChannels').reset();
-        return false;
     }
 
     document.querySelector('#newUserForm').onsubmit = () => {
@@ -53,22 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     socket.on('announce channel', data => {
-        addNewChannelOption(data['new_channel']);
-        return false;
+        debugger;
+        const parsedData = JSON.parse(data);
+        addNewChannelOption(parsedData['new_channel']);
     });
 
     // When a new user is added to a channel....
     socket.on('new channel user', data => {
-        debugger;
         const parsedData = JSON.parse(data);
         addAnnouncement(parsedData['username'], parsedData['cleanedChannelName']);
-        return false;
     });
 
     // When a new user is added to a channel....
     socket.on('new message', data => {
         addMessageToChannel(JSON.parse(data));
-        return false;
     });
 
     if (!localStorage.getItem('userIdentity')) {
@@ -111,6 +109,7 @@ function launchNewUser(username) {
    const data = new FormData();
    data.append('username', username);
    request.send(data);
+   return false;
 }
 
 function launchExistingUser() {
@@ -131,6 +130,7 @@ function launchExistingUser() {
         loadChannel(channelName);
     }
     document.getElementById("defaultOpen").click();
+    return false;
 }
 
 function loadChannel(channelName) {
@@ -162,6 +162,7 @@ function loadChannel(channelName) {
    const data = new FormData();
    data.append('channelName', channelName);
    request.send(data);
+   return false;
 }
 
 function loadAvailableChannels() {
@@ -178,6 +179,7 @@ function loadAvailableChannels() {
        }
     }
    request.send();
+   return false;
 }
 
 function openChannel() {
@@ -217,6 +219,7 @@ function emitMessage(e) {
         }
     );
     document.getElementById(e.target.id + "Value").value = "";
+    return false;
 }
 
 function emitNewAvailableChannel(channelName) {
@@ -227,13 +230,31 @@ function emitNewAvailableChannel(channelName) {
 
     // now tell the server a new channel is available
     newChannelSocket.emit(
-        "available channel",
+        "new channel",
         {
             'channelName': channelName,
             'cleanedChannelName': channelName.replace(/\W/g, ''),
             'userName': window.localStorage.getItem('userIdentity')
         }
     );
+    return false;
+}
+
+function reportNewChannelUser(channelName) {
+
+    var socketChannel = io.connect(
+        location.protocol + '//' + document.domain + ':' + location.port
+    );
+
+    socketChannel.emit(
+        'add channel user',
+        {
+            'channelName': channelName,
+            'cleanedChannelName': channelName.replace(/\W/g, ''),
+            'username': window.localStorage.getItem('userIdentity')
+        }
+    );
+    return false;
 }
 
 function addUserChannel(channelName) {
@@ -241,7 +262,6 @@ function addUserChannel(channelName) {
     // get the existing list of user channels and push new name onto it
     var channelArray = getListUserChannels();
     if (!channelArray.includes(channelName)) channelArray.push(channelName)
-
     localStorage.setItem('userChannels', JSON.stringify(channelArray))
 }
 
@@ -338,22 +358,6 @@ function addNewChannelOption(channelName) {
     option.setAttribute('value', channelName);
     option.innerHTML = channelName;
     document.querySelector('#existingChannels').append(option);
-}
-
-function reportNewChannelUser(channelName) {
-
-    var socketChannel = io.connect(
-        location.protocol + '//' + document.domain + ':' + location.port
-    );
-
-    socketChannel.emit(
-        'add channel user',
-        {
-            'channelName': channelName,
-            'cleanedChannelName': channelName.replace(/\W/g, ''),
-            'username': window.localStorage.getItem('userIdentity')
-        }
-    );
 }
 
 function addMessageToChannel(data) {
