@@ -78,7 +78,7 @@ def get_messages():
 
         result = {
             "success": True,
-            "messages": list_messages
+            "messages": list_messages if list_messages else None
         }
         return jsonify(result)
 

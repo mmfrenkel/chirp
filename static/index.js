@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // When server says a new user was added to a channel...
     socket.on('new channel user', data => {
         const parsedData = JSON.parse(data);
-        debugger;
         addAnnouncement(parsedData['username'], parsedData['cleanedChannelName']);
     });
 
@@ -80,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Ask user to submit a username, if it doesn't exist
     if (!localStorage.getItem('userIdentity')) {
-        console.log(localStorage.getItem('userIdentity'))
         document.getElementById('popup').style.display='block';
     } else {
         launchExistingUser()
@@ -100,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function launchNewUser(username) {
 
     const request = new XMLHttpRequest();
-    request.open('POST', '/api/create_user', false);
+    request.open('POST', '/api/create_user');
 
     // Callback function for when request completes
     request.onload = () => {
@@ -115,18 +113,17 @@ function launchNewUser(username) {
             addUserChannel('Welcome');         // adds 'Welcome' channel to local storage list of channels
             loadChannel('Welcome');            // loads any existing 'Welcome' messages on server
             loadAvailableChannels();           // gets all channels in use from user to add to options list
-            debugger;
             reportNewChannelUser('Welcome')    // tells server that new user exists + broadcasts
 
             // display 'Welcome' channel
             document.getElementById('defaultOpen').style.display = "block";
+            document.getElementById("defaultOpen").click();
 
         } else {
             // prompt user to provide another username
             document.querySelector('#status').innerHTML = 'Username Already Taken.';
         }
     }
-
     // ask server if the username already exists
     const data = new FormData();
     data.append('username', username);
@@ -169,7 +166,7 @@ function launchExistingUser() {
  */
 function loadChannel(channelName) {
     const request = new XMLHttpRequest();
-    request.open('POST', '/api/messages', false);
+    request.open('POST', '/api/messages');
 
     // Callback function for when request completes
     request.onload = () => {
@@ -209,7 +206,7 @@ function loadChannel(channelName) {
 function loadAvailableChannels() {
 
     const request = new XMLHttpRequest();
-    request.open('POST', '/api/available_channels', false);
+    request.open('POST', '/api/available_channels');
 
     request.onload = () => {
 
