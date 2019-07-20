@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#newUserForm').onsubmit = () => {
         const newUser = document.querySelector('#usernameField').value;
         launchNewUser(newUser);
+        return false;
     }
 
     socket.on('announce channel', data => {
@@ -67,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         addMessageToChannel(JSON.parse(data));
     });
 
+    debugger;
     if (!localStorage.getItem('userIdentity')) {
         console.log(localStorage.getItem('userIdentity'))
         document.getElementById('popup').style.display='block';
