@@ -22,7 +22,7 @@ h5 {
 }
 
 #logo {
-    width: 90px;
+    width: 80px;
 }
 
 #header h2 {
@@ -31,7 +31,7 @@ h5 {
     padding: 20px;
 }
 
-/***** SIGN UP INFORMATION *****/
+/***** BUTTONS! *****/
 
 .btn {
     background-color: #97b9f0;
@@ -183,6 +183,10 @@ hr {
     background-color: #ccc;
 }
 
+.tab button.unread {
+    font-weight: bold;
+}
+
 /* Style the tab content */
 .channel {
     float: left;
@@ -244,7 +248,7 @@ hr {
     color: #7dadfa;
 }
 
-.chat .userAnnoucement {
+.chat .userAnnouncement {
     color: lightgrey;
     font-style: italic;
     text-align: center;

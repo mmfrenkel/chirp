@@ -78,7 +78,6 @@ def available_channels():
 @socketio.on("new channel")
 def add_channel(data):
 
-    print('HELLO I MADE IT HERE!!!')
     channels.append(
         Channel(
             visible_name=data['channelName'],
@@ -142,6 +141,7 @@ def handle_message(data):
     channels[channel_index] = channel_object
 
     message_content = {
+        "channelName": channel_name,
         "cleanedChannelName": cleaned_channel_name,
         "user": data['user'],
         "message_header":  data['user'] + " (" + format_date_string(data['time']) + "):",

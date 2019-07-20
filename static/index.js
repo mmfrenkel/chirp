@@ -1,8 +1,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    debugger;
-
     // Connect to websocket
     var socket = io.connect(
         location.protocol + '//' + document.domain + ':' + location.port
@@ -41,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         addUserChannel(existingChannel);         // keep track of channels belonging to user
         reportNewChannelUser(existingChannel);   // tells server that new user exists + broadcasts
 
-        debugger;
         return false;
     }
 
@@ -52,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     socket.on('announce channel', data => {
-        debugger;
         const parsedData = JSON.parse(data);
         addNewChannelOption(parsedData['new_channel']);
     });
@@ -60,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // When a new user is added to a channel....
     socket.on('new channel user', data => {
         const parsedData = JSON.parse(data);
+        debugger;
         addAnnouncement(parsedData['username'], parsedData['cleanedChannelName']);
     });
 
@@ -68,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
         addMessageToChannel(JSON.parse(data));
     });
 
-    debugger;
     if (!localStorage.getItem('userIdentity')) {
         console.log(localStorage.getItem('userIdentity'))
         document.getElementById('popup').style.display='block';
@@ -114,7 +110,6 @@ function launchNewUser(username) {
 
 function launchExistingUser() {
 
-    debugger;
     // get the list of channels associated with the user...
     loadAvailableChannels();
     const listChannels = getListUserChannels();
@@ -140,7 +135,6 @@ function loadChannel(channelName) {
     // Callback function for when request completes
    request.onload = () => {
 
-       debugger;
        const data = JSON.parse(request.responseText);
 
        if (data.success && data.messages != null) {
@@ -172,7 +166,7 @@ function loadAvailableChannels() {
 
     // Callback function for when request completes
    request.onload = () => {
-       debugger;
+
        const data = JSON.parse(request.responseText);
        for (let channelName in data.availableChannels) {
            addNewChannelOption(data.availableChannels[channelName])
@@ -199,7 +193,9 @@ function openChannel() {
         // first, by default, switch to inactive
         tab.className = tab.className.replace(" active", "");
     }
+
     this.className += " active";
+    this.className = this.className.replace(" unread", "");
 }
 
 function emitMessage(e) {
@@ -345,6 +341,7 @@ function addNewChannelTab(channelName) {
         'button',
         {
             'class': 'channelTab',
+            'name': `${channelName.replace(/\W/g, '')}Tab`,
             'data-channelname': channelName
         },
         channelName
@@ -397,8 +394,10 @@ function addMessageToChannel(data) {
             data.message
         )
     );
+
     document.getElementById(`${data.cleanedChannelName}Chat`).appendChild(messageHeader);
     document.getElementById(`${data.cleanedChannelName}Chat`).appendChild(messageContent);
+    setTabUnread(data.channelName);
 }
 
 function addAnnouncement(username, cleanedChannelName) {
@@ -410,16 +409,19 @@ function addAnnouncement(username, cleanedChannelName) {
         message = `${username} joined this channel.`
     }
 
-    const userAnnoucement = elementFactory (
+    const userAnnouncement = elementFactory (
         'div',
         {},
         elementFactory(
             'p',
-            { 'class': 'userAnnoucement'},
+            { 'class': 'userAnnouncement'},
             message
         )
     );
-    document.getElementById(`${cleanedChannelName}Chat`).appendChild(userAnnoucement);
+
+    // if the element exists (i.e., the channel has been added for the user, then add announcement
+    var channelChatter = document.getElementById(`${cleanedChannelName}Chat`);
+    if (channelChatter != null) channelChatter.appendChild(userAnnouncement);
 }
 
 function getListUserChannels() {
@@ -431,6 +433,17 @@ function getListUserChannels() {
     }
     return channels;
 }
+
+function setTabUnread(channelName) {
+
+    debugger;
+    if (document.getElementsByClassName("active")[0].dataset.channelname != channelName) {
+
+        var channelTab = document.getElementsByName(`${channelName.replace(/\W/g, '')}Tab`)[0];
+        channelTab.className += " unread";
+    }
+}
+
 
 // this helper function was inspired by Kyle Shevlin
 // (How to Write Your Own JavaScript DOM Element Factory, kyleshelvin.com)
@@ -451,3 +464,4 @@ function elementFactory(type, attributes, ...children) {
     }
     return newElement;
 }
+
