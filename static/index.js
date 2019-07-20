@@ -22,8 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         addNewChannel(channelName);               // create the channel in UI
         addNewChannelTab(channelName);            // create the tab in UI
-
-        debugger;
         emitNewAvailableChannel(channelName);     // tell the server a new channel is available
         addUserChannel(channelName);              // keep track of channels belonging to user
         reportNewChannelUser(channelName);        // tell the server about the new user
@@ -37,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const existingChannel = document.querySelector('#existingChannels').value;
 
-        addNewChannel(existingChannel);         // create the channel in UI
-        addNewChannelTab(existingChannel);      // create the tab in UI
-        loadChannel(existingChannel);           // load any existing channels from server
-        addUserChannel(channelName);            // keep track of channels belonging to user
-        reportNewChannelUser(existingChannel)   // tells server that new user exists + broadcasts
+        addNewChannel(existingChannel);          // create the channel in UI
+        addNewChannelTab(existingChannel);       // create the tab in UI
+        loadChannel(existingChannel);            // load any existing channels from server
+        addUserChannel(existingChannel);         // keep track of channels belonging to user
+        reportNewChannelUser(existingChannel);   // tells server that new user exists + broadcasts
 
-        // reset the form, don't reload
-        document.querySelector('#existingChannels').reset();
+        debugger;
+        return false;
     }
 
     document.querySelector('#newUserForm').onsubmit = () => {
@@ -405,9 +403,9 @@ function addAnnouncement(username, cleanedChannelName) {
 
     var message;
     if (username === window.localStorage.getItem('userIdentity')) {
-        message = 'You just joined this channel.'
+        message = 'You joined this channel.'
     } else {
-        message = `${username} just joined this channel.`
+        message = `${username} joined this channel.`
     }
 
     const userAnnoucement = elementFactory (
