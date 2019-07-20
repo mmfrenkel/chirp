@@ -81,7 +81,7 @@ Socket.IO is leveraged to communicate (a) newly available channels (b) new messa
 in a channel, (c) new users of channels. enables new channels, messages, 
 and users to be broadcast to all users.
 
-Additionally, this project uses XMLHttpRequest objects to make requests to the project's
+Additionally, this project uses AJAX XMLHttpRequest objects to make requests to the project's
 API endpoints (read more about the Flask server below) in order to (a) add users to channels
 (b) get all messages stored in the server for a given channel and (c) get a list of all
 available channels on the server.
@@ -98,11 +98,11 @@ routes configured in this project's `application.py` file.
 These routes makes the following endpoints available:
 
 * `/`: default, servers the `index.html` file.
-* `/api/create_user`: accepts an XMLHttpRequest `POST` request to create a new user/username. This request must
+* `/api/create_user`: accepts an AJAX XMLHttpRequest `POST` request to create a new user/username. This request must
 contain the username information.
-* `/api/messages`: accepts an XMLHttpRequest `POST` request containing an "uncleaned" channel 
+* `/api/messages`: accepts an AJAX XMLHttpRequest `POST` request containing an "uncleaned" channel 
 name and returns a result containing the list of messages/announcements available.
-* `/api/available_channels`: accepts an XMLHttpRequest `POST` request for new channels
+* `/api/available_channels`: accepts an AJAX XMLHttpRequest `POST` request for new channels
 that returns a list of the names of the channels stored on the server. 
 
 Additionally, this server uses Flask-SocketIO in order to register the following
