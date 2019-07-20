@@ -20,7 +20,7 @@ a pop-up window. If the provided username already exists, the user will be notif
 
 Once the username is approved, the _Chirp!_ interactive application will open. 
 The application, without any channels created or messages sent, will load only with
-a 'Welcome' channel that all users share and are added to by default. 
+a `Welcome` channel that all users share and are added to by default. 
 
 <p align="center">
   <img src="./site_images/app-no-messages.png" width="700" title="App Without Messages">
@@ -77,6 +77,10 @@ Additionally, this project uses XMLHttpRequest objects to make requests to the p
 API endpoints (read more about the Flask server below) in order to (a) add users to channels
 (b) get all messages stored in the server for a given channel and (c) get a list of all
 available channels on the server.
+
+This application additionally utilizes localStorage such that JavaScript can remember both the
+username of the user and which channels that user has added to their application. This allows a
+user to return back to _Chirp!_ without loosing their channels or messages.
 
 ### Flask
 
@@ -136,7 +140,13 @@ With the above completed, you can deploy the website locally and review it by ru
 ```
 $ flask run
 ```
-Use the resulting url printed by Flask in any browser.
+Use the resulting url printed by Flask in any browser. 
+
+**Note**: This application utilizes localStorage to keep track of the user's identity (username)
+and the channels associated with their username. However, the Flask server keeps track of channels
+within memory as a global variable that is reset when a developer quits Flask. This means that for best
+performance of the app, run `localStorage.clear()` in the development console of your browser before re-launching
+the Flask app.
 
 ## V. Developer Notes 
 This project was developed on a Macbook (macOS Mojave) and was primarily tested in
