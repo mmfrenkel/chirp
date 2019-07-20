@@ -15,7 +15,7 @@ a pop-up window. If the provided username already exists, the user will be notif
  the pop-up and prompted to try another username.
 
 <p align="center">
-  <img src="./site_images/create-username.png" width="600" title="Create Username">
+  <img src="./site_images/create-username.png" width="700" title="Create Username">
 </p>
 
 Once the username is approved, the _Chirp!_ interactive application will open. 
@@ -23,7 +23,7 @@ The application, without any channels created or messages sent, will load only w
 a 'Welcome' channel that all users share and are added to by default. 
 
 <p align="center">
-  <img src="./site_images/app-no-messages.png" width="600" title="App Without Messages">
+  <img src="./site_images/app-no-messages.png" width="700" title="App Without Messages">
 </p>
 
 Within the app, a user then has three potential actions: 
@@ -40,10 +40,12 @@ Once a user is active in channels, they can expect two types of notifications:
 center of the chat application. 
 * When a new message is loaded into a channel _that isn't already open_, the left Channel tab 
 will become bold. Once the user clicks on this channel to read the message, the flag will clear.
-See examples of both notifications in the screenshot below.
+
+See examples of both notifications in the screenshot below, with `Meg's Channel` having an unread notification
+and two instances where new users, `mfrenkel` and `andrewgrant243` joined the channel.
 
 <p align="center">
-  <img src="./site_images/app-with-messages.png" width="600" title="App With Messages">
+  <img src="./site_images/app-with-messages.png" width="700" title="App With Messages">
 </p>
 
 The message box will scroll, such that conversation lengths are not limited
