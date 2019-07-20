@@ -35,14 +35,19 @@ selecting `Enter`
 Any newly created or added channels will line up on the left of the main chat box in grey. 
 Users can simply click on any given channel name, functioning like a tab, to open up that channel.
 
-Once a user is active in channels, they can expect two types of notifications:
+#### Special Features
+
+This application was made with notifications as a special additional touch. Once a user 
+is active in channels, they can expect two types of notifications:
 1. When a new user is added to a channel, they will notified with a small grey message in the
 center of the chat application. 
 2. When a new message is loaded into a channel _that isn't already open_, the left Channel tab 
 will become bold. Once the user clicks on this channel to read the message, the flag will clear.
 
-See examples of both notifications in the screenshot below, with `Meg's Channel` having an unread notification
-and two instances of messages when `andrewgrant243` and `mfrenkel` joined the channel (note `mfrenkel` is 
+See examples of both notifications in the screenshot below, showing available channels
+for username `mfrenkel`. Here, `mfrenkel` has an unread notification in `Meg's Channel`. 
+Additionally, the `Events` channel displayed shows two instances of messages users joining the channel;
+one when `andrewgrant243` joined and one when `mfrenkel` joined the channel (note `mfrenkel` is 
 shown as `You` because this window represents `mfrenkel`'s window).
 
 
