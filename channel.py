@@ -12,7 +12,7 @@ class Channel:
         self.users = list()
         self.date_created = datetime.now()
 
-    def add_message(self, user, time, content):
+    def add_message(self, user, time, content, type):
         """
         Adds a new message object to the list of Messages in this channel. Channel can only hold
         100 messages at a time; older messages will be removed.
@@ -21,7 +21,14 @@ class Channel:
         :param time: time that the message was submitted by user
         :param content: text of the message
         """
-        self.messages.append(Message(user=user, time_created=time, content=content))
+        self.messages.append(
+            Message(
+                user=user,
+                time_created=time,
+                content=content,
+                type=type
+            )
+        )
 
         for message in self.messages:
             print(message)
@@ -45,8 +52,8 @@ class Channel:
                 "cleanedChannelName": self.cleaned_name,
                 "user": message.user,
                 "message_header": message.user + " (" + message.time_created + "):",
-                "message": message.content
-
+                "message": message.content,
+                "type": message.type
             } for message in self.messages
         ]
 

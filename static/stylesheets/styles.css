@@ -122,7 +122,7 @@ hr {
 #appContainer {
     width: 900px;
     align-items: center;
-    height: 700px;
+    height: 650px;
     margin-top: 40px;
     margin-bottom: 40px;
     overflow: hidden;
@@ -244,6 +244,14 @@ hr {
     color: #7dadfa;
 }
 
+.chat .userAnnoucement {
+    color: lightgrey;
+    font-style: italic;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 /* Channel Footer */
 
 .channel .channelFooter {
@@ -277,6 +285,10 @@ hr {
     max-width: 660px;
     padding-top: 40px;
     height: 200px;
+}
+
+#userOptions .centerBox {
+    border-top: 1px solid lightgrey;
 }
 
 #newChannelAdd {

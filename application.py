@@ -2,6 +2,7 @@ import os
 import json
 from channel import Channel
 from helpers import format_date_string
+from datetime import datetime
 
 from flask import Flask, session, request, render_template, jsonify
 from flask_socketio import SocketIO, emit
@@ -27,13 +28,9 @@ def index():
 @app.route("/api/messages", methods=["POST"])
 def get_messages():
 
-    # testing purposes only
-    # for channel in channels:
-    #    print(f"Channel: {channel.name}: Messages: {channel.get_messages()}")
-
     try:
         channel_name = request.values.get('channelName')
-        channel_index = index_of_channel_stored(channel_name)
+        channel_index = get_index_of_channel_stored(channel_name)
 
         if channel_index is not None:
             channel_object = channels[channel_index]
@@ -48,13 +45,11 @@ def get_messages():
             "success": True,
             "messages": list_messages
         }
-
         return jsonify(result)
 
     except Exception as e:
-        print(e)
         result = {
-            "success": False,
+            "success": False
         }
         return jsonify(result)
 
@@ -63,11 +58,10 @@ def get_messages():
 def check_username_available():
 
     prospective_username = request.form.get('username')
-    if not users or prospective_username not in users:
 
+    if prospective_username not in users:
         users.append(prospective_username)
         return jsonify(available=True)
-
     else:
         return jsonify(available=False)
 
@@ -76,21 +70,44 @@ def check_username_available():
 def available_channels():
 
     channel_names = [channel.name for channel in channels]
-    print(f"Here is the list of available channels: {channel_names}")
 
+    print(f"Here is the list of available channels: {channel_names}")
     return jsonify(availableChannels=channel_names)
 
 
-@socketio.on("added channel")
+@socketio.on("available channel")
 def add_channel(data):
 
-    channel_name = data['channelName']
-    cleaned_channel_name = data['cleanedChannelName']
+    print('HELLO I MADE IT HERE!!!')
     channels.append(
-        Channel(visible_name=channel_name, cleaned_name=cleaned_channel_name)
+        Channel(
+            visible_name=data['channelName'],
+            cleaned_name=data['cleanedChannelName']
+        )
     )
-    print(f"Added this channel: {channel_name}")
-    emit("announce channel", {"new_channel": channel_name}, broadcast=True)
+
+    content = {
+        "new_channel": data['channelName']
+    }
+
+    print(f"Added a new channel: {data['channelName']}")
+    emit("announce channel", json.dumps(content), broadcast=True)
+
+
+@socketio.on("add channel user")
+def new_channel_user(data):
+
+    add_user_to_channel(data['username'], data['channelName'])
+
+    content = {
+        "channelName": data['channelName'],
+        "cleanedChannelName": data['cleanedChannelName'],
+        "username": data['username']
+    }
+
+    print(f"Added new user ({data['username']}) to channel ({data['channelName']})")
+    emit("new channel user", json.dumps(content), broadcast=True)
+
 
 @socketio.on("handle message")
 def handle_message(data):
@@ -98,12 +115,15 @@ def handle_message(data):
     # get the channel object from the list of channels
     channel_name = data['channelName']
     cleaned_channel_name = data['cleanedChannelName']
-    channel_index = index_of_channel_stored(channel_name)
+    channel_index = get_index_of_channel_stored(channel_name)
 
     # if channel index doesn't yet exist, create the object to get the index
     if channel_index is None:
         channels.append(
-            Channel(visible_name=channel_name, cleaned_name=cleaned_channel_name)
+            Channel(
+                visible_name=channel_name,
+                cleaned_name=cleaned_channel_name
+            )
         )
         print(f"While handling message, added this channel: {channel_name}")
         channel_index = len(channels) - 1  # order of elements in list persists
@@ -114,7 +134,8 @@ def handle_message(data):
     channel_object.add_message(
         user=data['user'],
         time=format_date_string(data['time']),
-        content=data['message']
+        content=data['message'],
+        type="message"
     )
 
     # reset channel object at location
@@ -131,7 +152,22 @@ def handle_message(data):
     emit("new message", json.dumps(message_content), broadcast=True)
 
 
-def index_of_channel_stored(channel_name):
+def add_user_to_channel(username, channel_name):
+
+    channel_index = get_index_of_channel_stored(channel_name)
+    channel_object = channels[channel_index]
+
+    channel_object.add_user(username)
+    channel_object.add_message(
+        user=username,
+        time=datetime.now().strftime("%m/%d/%Y, %H:%M:%S"),
+        content=f'{username} was added to channel.',
+        type="announcement"
+    )
+    channels[channel_index] = channel_object
+
+
+def get_index_of_channel_stored(channel_name):
 
     index_channel = 0
     for channel in channels:

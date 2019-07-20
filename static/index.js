@@ -19,67 +19,58 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#newChannelForm').onsubmit = () => {
 
         debugger;
-        // create new channel elements
         const channelName = document.querySelector('#newChannelName').value;
-        createNewChannel(channelName);
-        createNewChannelTab(channelName);
 
-        // reset the form, don't reload
+        addNewChannel(channelName);               // create the channel in UI
+        addNewChannelTab(channelName);            // create the tab in UI
+        emitNewAvailableChannel(channelName);     // tell the server a new channel is available
+        addUserChannel(channelName);              // keep track of channels belonging to user
+        reportNewChannelUser(channelName);        // tell the server about the new user
+
+        // reset the form
         document.querySelector('#newChannelForm').reset();
-
-        // now tell the server a new channel is available
-        socket.emit(
-            'added channel',
-            {
-                'channelName': channelName,
-                'cleanedChannelName': channelName.replace(/\W/g, '')
-            }
-        );
-
-        // save it as that user's channel
-        storeUserChannel(channelName);
         return false;
     }
 
     document.querySelector('#existingChannelForm').onsubmit = () => {
 
-        // create channel elements
         const existingChannel = document.querySelector('#existingChannels').value;
-        createChannel(existingChannel);
-        createChannelTab(existingChannel);
-        loadChannel(existingChannel);
+
+        addNewChannel(existingChannel);         // create the channel in UI
+        addNewChannelTab(existingChannel);      // create the tab in UI
+        loadChannel(existingChannel);           // load any existing channels from server
+        addUserChannel(channelName);            // keep track of channels belonging to user
+        reportNewChannelUser(existingChannel)   // tells server that new user exists + broadcasts
 
         // reset the form, don't reload
         document.querySelector('#existingChannels').reset();
-
-        // now tell the server a new channel is available
-        //socket.emit('user requested channel', {'channel': existingChannel, 'user': userName});
-        // return false;
+        return false;
     }
 
     document.querySelector('#newUserForm').onsubmit = () => {
-        debugger;
         const newUser = document.querySelector('#usernameField').value;
         launchNewUser(newUser);
     }
 
     socket.on('announce channel', data => {
-        addNewChannelOption(data['new_channel'])
+        addNewChannelOption(data['new_channel']);
+        return false;
     });
 
     // When a new user is added to a channel....
     socket.on('new channel user', data => {
-        // addNewUser(data['username'])
+        debugger;
+        const parsedData = JSON.parse(data);
+        addAnnouncement(parsedData['username'], parsedData['cleanedChannelName']);
+        return false;
     });
 
     // When a new user is added to a channel....
     socket.on('new message', data => {
-        debugger;
-        const messageContent = JSON.parse(data);
-        loadMessageToChannel(messageContent);
+        addMessageToChannel(JSON.parse(data));
+        return false;
     });
 
-    debugger;
     if (!localStorage.getItem('userIdentity')) {
         console.log(localStorage.getItem('userIdentity'))
         document.getElementById('popup').style.display='block';
@@ -89,6 +80,38 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // HELPER FUNCTIONS
+
+function launchNewUser(username) {
+
+    const request = new XMLHttpRequest();
+    request.open('POST', '/api/create_user', false);
+
+    // Callback function for when request completes
+   request.onload = () => {
+
+       const data = JSON.parse(request.responseText);
+
+       if (data.available) {
+
+           window.localStorage.setItem('userIdentity', username);
+           document.getElementById('popup').style.display='none';
+
+           addUserChannel('Welcome');         // adds 'Welcome' channel to local storage list of channels
+           loadChannel('Welcome');            // loads any existing 'Welcome' messages on server
+           loadAvailableChannels();           // gets all channels in use from user to add to options list
+           reportNewChannelUser('Welcome')    // tells server that new user exists + broadcasts
+
+           // display 'Welcome' channel
+           document.getElementById('defaultOpen').style.display = "block";
+
+       } else {
+           document.querySelector('#status').innerHTML = 'Username Already Taken.';
+        }
+    }
+   const data = new FormData();
+   data.append('username', username);
+   request.send(data);
+}
 
 function launchExistingUser() {
 
@@ -102,40 +125,12 @@ function launchExistingUser() {
 
         var channelName = listChannels[i];
         if (channelName != "Welcome") {  // the Welcome channel is the default on the page, so already exists
-            createNewChannel(channelName);
-            createNewChannelTab(channelName);
+            addNewChannel(channelName);
+            addNewChannelTab(channelName);
         }
         loadChannel(channelName);
     }
     document.getElementById("defaultOpen").click();
-}
-
-function launchNewUser(prospectiveUserName) {
-
-    const request = new XMLHttpRequest();
-    request.open('POST', '/api/create_user', false);
-
-    // Callback function for when request completes
-   request.onload = () => {
-
-       const data = JSON.parse(request.responseText);
-
-       if (data.available) {
-           // setup for new user
-           window.localStorage.setItem('userIdentity', prospectiveUserName);
-           document.getElementById('popup').style.display='none';
-           storeUserChannel('Welcome');
-           loadChannel('Welcome');
-           loadAvailableChannels();
-           document.getElementById('defaultOpen').style.display = "block";
-
-       } else {
-           document.querySelector('#status').innerHTML = 'Username Already Taken.';
-        }
-    }
-   const data = new FormData();
-   data.append('username', prospectiveUserName);
-   request.send(data);
 }
 
 function loadChannel(channelName) {
@@ -148,14 +143,18 @@ function loadChannel(channelName) {
        debugger;
        const data = JSON.parse(request.responseText);
 
-       if (data.success) {
-           if (data.messages != null) {
-               const messageInfo = JSON.parse(data.messages);
-               for (let message in messageInfo['messages']) {
-                   loadMessageToChannel(messageInfo['messages'][message]);
+       if (data.success && data.messages != null) {
+           const messageInfo = JSON.parse(data.messages);
+           for (let message in messageInfo['messages']) {
+
+               var messageContent = messageInfo['messages'][message];
+               if (messageContent['type'] === 'message') {
+                   addMessageToChannel(messageContent);
+               } else if (messageContent['type'] === 'announcement') {
+                   addAnnouncement(messageContent.user, messageContent.cleanedChannelName);
                }
            }
-       } else {
+       } else if (!data.success) {
            alert(`Warning! Something bad happened when attempting to load ${channelName}`);
        }
     }
@@ -165,32 +164,90 @@ function loadChannel(channelName) {
    request.send(data);
 }
 
-// this helper function was inspired by Kyle Shevlin
-// (How to Write Your Own JavaScript DOM Element Factory, kyleshelvin.com)
-function elementFactory(type, attributes, ...children) {
-    const newElement = document.createElement(type);
+function loadAvailableChannels() {
 
-    for (let attribute in attributes) {
-        newElement.setAttribute(attribute, attributes[attribute]);
-    }
+    const request = new XMLHttpRequest();
+    request.open('POST', '/api/available_channels', false);
 
-    if (children[0] !== null) {
-        for (let child of children) {
-            if (typeof child === 'string') newElement.appendChild(
-                document.createTextNode(child)
-            );
-            else newElement.appendChild(child);
-        }
+    // Callback function for when request completes
+   request.onload = () => {
+       debugger;
+       const data = JSON.parse(request.responseText);
+       for (let channelName in data.availableChannels) {
+           addNewChannelOption(data.availableChannels[channelName])
+       }
     }
-    return newElement;
+   request.send();
 }
 
-// factory function for generating elements ()
-function createNewChannel(channelName) {
+function openChannel() {
 
-    debugger;
+    // Make other panels display as none
+    const channels = document.getElementsByClassName("channel");
+    for (let channel of channels) {
+        channel.style.display = "none";
+    }
+    // the data-channelName attribute of the button = the id of the content box to display
+    const channelName = this.dataset.channelname
+    document.getElementById(channelName.replace(/\W/g, '')).style.display = "block";
+
+    // change all buttons to inactive, except "this" button
+    const channelTabs = document.getElementsByClassName("channelTab");
+    for (let tab of channelTabs) {
+        // first, by default, switch to inactive
+        tab.className = tab.className.replace(" active", "");
+    }
+    this.className += " active";
+}
+
+function emitMessage(e) {
+
+    var socketMessage = io.connect(
+        location.protocol + '//' + document.domain + ':' + location.port
+    );
+
+    socketMessage.emit(
+        'handle message',
+        {
+            'channelName': e.target.dataset.channelname,
+            'cleanedChannelName': e.target.id.split("Form")[0],
+            'user': window.localStorage.getItem('userIdentity'),
+            'time': (new Date).toISOString(),
+            'message': document.getElementById(e.target.id + "Value").value
+        }
+    );
+    document.getElementById(e.target.id + "Value").value = "";
+}
+
+function emitNewAvailableChannel(channelName) {
+
+    var newChannelSocket = io.connect(
+        location.protocol + '//' + document.domain + ':' + location.port
+    );
+
+    // now tell the server a new channel is available
+    newChannelSocket.emit(
+        "available channel",
+        {
+            'channelName': channelName,
+            'cleanedChannelName': channelName.replace(/\W/g, ''),
+            'userName': window.localStorage.getItem('userIdentity')
+        }
+    );
+}
+
+function addUserChannel(channelName) {
+
+    // get the existing list of user channels and push new name onto it
+    var channelArray = getListUserChannels();
+    if (!channelArray.includes(channelName)) channelArray.push(channelName)
+
+    localStorage.setItem('userChannels', JSON.stringify(channelArray))
+}
+
+function addNewChannel(channelName) {
+
     const cleanedChannelName = channelName.replace(/\W/g, '');
-
     const newChannel = elementFactory (
         'div',
         {
@@ -255,16 +312,14 @@ function createNewChannel(channelName) {
             )
         )
     );
-
-    debugger;
     newChannel.style.display = "none";
     document.getElementById("channelContainer").appendChild(newChannel);
 
-    // now add the button's 'send' action
+    // add the button's 'send' action
     document.querySelector(`#${cleanedChannelName}Form`).onsubmit = emitMessage;
 }
 
-function createNewChannelTab(channelName) {
+function addNewChannelTab(channelName) {
 
     const newTab = elementFactory(
         'button',
@@ -278,27 +333,30 @@ function createNewChannelTab(channelName) {
     document.getElementById("tabList").appendChild(newTab);
 }
 
-function openChannel() {
-
-    // Make other panels display as none
-    const channels = document.getElementsByClassName("channel");
-    for (let channel of channels) {
-        channel.style.display = "none";
-    }
-    // the data-channelName attribute of the button = the id of the content box to display
-    const channelName = this.dataset.channelname
-    document.getElementById(channelName.replace(/\W/g, '')).style.display = "block";
-
-    // change all buttons to inactive, except "this" button
-    const channelTabs = document.getElementsByClassName("channelTab");
-    for (let tab of channelTabs) {
-        // first, by default, switch to inactive
-        tab.className = tab.className.replace(" active", "");
-    }
-    this.className += " active";
+function addNewChannelOption(channelName) {
+    const option = document.createElement('option');
+    option.setAttribute('value', channelName);
+    option.innerHTML = channelName;
+    document.querySelector('#existingChannels').append(option);
 }
 
-function loadMessageToChannel(data) {
+function reportNewChannelUser(channelName) {
+
+    var socketChannel = io.connect(
+        location.protocol + '//' + document.domain + ':' + location.port
+    );
+
+    socketChannel.emit(
+        'add channel user',
+        {
+            'channelName': channelName,
+            'cleanedChannelName': channelName.replace(/\W/g, ''),
+            'username': window.localStorage.getItem('userIdentity')
+        }
+    );
+}
+
+function addMessageToChannel(data) {
 
     var alignment, type;
 
@@ -339,20 +397,25 @@ function loadMessageToChannel(data) {
     document.getElementById(`${data.cleanedChannelName}Chat`).appendChild(messageContent);
 }
 
-function addNewChannelOption(channelName) {
-    const option = document.createElement('option');
-    option.setAttribute('value', channelName);
-    option.innerHTML = channelName;
-    document.querySelector('#existingChannels').append(option);
-}
+function addAnnouncement(username, cleanedChannelName) {
 
-function storeUserChannel(channelName) {
+    var message;
+    if (username === window.localStorage.getItem('userIdentity')) {
+        message = 'You just joined this channel.'
+    } else {
+        message = `${username} just joined this channel.`
+    }
 
-    // get the existing list of user channels and push new name onto it
-    var channelArray = getListUserChannels();
-    if (!channelArray.includes(channelName)) channelArray.push(channelName)
-
-    localStorage.setItem('userChannels', JSON.stringify(channelArray))
+    const userAnnoucement = elementFactory (
+        'div',
+        {},
+        elementFactory(
+            'p',
+            { 'class': 'userAnnoucement'},
+            message
+        )
+    );
+    document.getElementById(`${cleanedChannelName}Chat`).appendChild(userAnnoucement);
 }
 
 function getListUserChannels() {
@@ -360,45 +423,27 @@ function getListUserChannels() {
     if (localStorage.getItem('userChannels') != null) {
         var channels = JSON.parse(localStorage.getItem('userChannels'));
     } else {
-        var channels = ['Welcome']; // startApplication() case
+        var channels = ['Welcome'];  // launchNewUser(), setup case
     }
     return channels;
 }
 
-function emitMessage(e) {
+// this helper function was inspired by Kyle Shevlin
+// (How to Write Your Own JavaScript DOM Element Factory, kyleshelvin.com)
+function elementFactory(type, attributes, ...children) {
+    const newElement = document.createElement(type);
 
-    // Connect to websocket
-    var socketMessage = io.connect(
-        location.protocol + '//' + document.domain + ':' + location.port
-    );
-
-    debugger;
-    socketMessage.emit(
-        'handle message',
-        {
-            'channelName': e.target.dataset.channelname,
-            'cleanedChannelName': e.target.id.split("Form")[0],
-            'user': window.localStorage.getItem('userIdentity'),
-            'time': (new Date).toISOString(),
-            'message': document.getElementById(e.target.id + "Value").value
-        }
-    );
-    document.getElementById(e.target.id + "Value").value = "";
-    return false;
-}
-
-function loadAvailableChannels() {
-
-    const request = new XMLHttpRequest();
-    request.open('POST', '/api/available_channels', false);
-
-    // Callback function for when request completes
-   request.onload = () => {
-       debugger;
-       const data = JSON.parse(request.responseText);
-       for (let channelName in data.availableChannels) {
-           addNewChannelOption(data.availableChannels[channelName])
-       }
+    for (let attribute in attributes) {
+        newElement.setAttribute(attribute, attributes[attribute]);
     }
-   request.send();
+
+    if (children[0] !== null) {
+        for (let child of children) {
+            if (typeof child === 'string') newElement.appendChild(
+                document.createTextNode(child)
+            );
+            else newElement.appendChild(child);
+        }
+    }
+    return newElement;
 }
